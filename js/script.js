@@ -1,12 +1,13 @@
 var game = new Phaser.Game(
-  800,
-  600,
+  480,
+  624,
   Phaser.AUTO,
   '',
   { preload: preload, create: create, update: update }
 );
 
 var block;
+var activeSquares = [];
 var cursor;
 var elapsed = 0;
 
@@ -37,12 +38,7 @@ function preload() {
 function create() {
 
   // Add a random tetris sprite to the game
-  block = game.add.sprite(
-    game.world.centerX, // x position
-    0,                  // y position
-    'o-block'           // keys
-  );
-  block.anchor.set(0.5, 0.5);
+  block = makeBlock();
 
   // Assign controls to it
   cursors = game.input.keyboard.createCursorKeys();
@@ -73,17 +69,66 @@ function update() {
     elapsed = 0;
   }
 
-  if (block.y > 600) {
+  if (block.bottom > 600) {
 
-    block.destroy();
+    //block.destroy();
+    block = makeBlock();
+  }
 
-    block = game.add.sprite(
-      game.world.centerX,
-      0,
-      blocks[Math.floor(Math.random() * blocks.length)]
-    );
-    block.anchor.set(0.5, 0.5);
+}
+
+// This function makes blocks for us
+var makeBlock = function() {
+
+  // Actually creates block
+  var block = game.add.sprite(
+    game.world.centerX,
+    0,
+    blocks[Math.floor(Math.random() * blocks.length)]
+  );
+  block.anchor.set(0.5, 0.5);
+  block.x += (block.width / 2);
+
+  switch(block.key) {
+
+    case "i-block":
+
+      for(var i = 0; i < activeSquares.length; i ++) {
+
+        activeSquares[i] = {};
+        activeSquares[i].x = block.x;
+        activeSquares[i].y = block.bottom - (BLOCK_WIDTH / 2 + i * BLOCK_WIDTH);
+
+      }
+      break;
+
+    case "o-block":
+
+      (for var i = 0; i < activeSquares.length; i ++) {
+
+        activeSquares[i] = {};
+        if (i % 2 === 0) {
+
+          // Left hand side of square
+          activeSquares[i].x = block.x - (BLOCK_WIDTH / 2);
+
+        } else {
+
+          // Right hand side of square
+          activeSquares[i].x = block.x + (BLOCK_WIDTH / 2);
+
+        }
+
+      }
+      break;
+
+    case "t-block":
+
+    default:
+      break;
 
   }
+
+  return block;
 
 }
